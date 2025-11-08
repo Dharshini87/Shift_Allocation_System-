@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Allocation - Step 2{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card">
+    <h2>⚙ Station & Operator (Step 2)</h2>
+
+    <form method="POST" class="auth-form">
+      <div class="input-row">
+        <span class="input-emoji">🏭</span>
+        <select name="station" required>
+          <option value="" disabled selected>Select Station</option>
+          {% for s in stations %}
+            <option value="{{ s }}">{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="input-row">
+        <span class="input-emoji">👷</span>
+        <select name="operator" required>
+          <option value="" disabled selected>Select Operator</option>
+          {% for op in operators %}
+            <option value="{{ op }}">{{ op }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="primary-btn">💾 Save Allocation</button>
+        <a href="{{ url_for('form_step1') }}" class="secondary-btn">✏ Edit</a>
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+

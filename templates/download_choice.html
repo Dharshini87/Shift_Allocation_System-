@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Download Options{% endblock %}
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card" style="text-align:center;">
+    <h2>📦 Download or Create Another Submission</h2>
+
+    <div style="margin-top:20px;">
+      <a href="{{ url_for('form_step1') }}" class="primary-btn">➕ Another Submission</a>
+    </div>
+
+    <hr style="margin:25px 0; border:1px solid #ddd;">
+
+    <h3>📥 Download Allocations</h3>
+    <div class="button-group" style="margin-top:15px;">
+      <a href="{{ url_for('download', period='daily') }}" class="secondary-btn">📅 Daily Report</a>
+      <a href="{{ url_for('download', period='weekly') }}" class="secondary-btn">🗓 Weekly Report</a>
+      <a href="{{ url_for('download', period='monthly') }}" class="secondary-btn">📆 Monthly Report</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

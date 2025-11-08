@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Allocation Success</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: "Poppins", sans-serif;
+            background: linear-gradient(135deg, #2e8b57, #0c4b33);
+            color: white;
+            text-align: center;
+            padding-top: 100px;
+        }
+        .card {
+            background: white;
+            color: #333;
+            margin: auto;
+            padding: 40px;
+            border-radius: 20px;
+            width: 450px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #2e8b57;
+        }
+        .buttons {
+            margin-top: 30px;
+        }
+        .buttons a {
+            text-decoration: none;
+            background: #2e8b57;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            margin: 10px;
+            transition: 0.3s;
+        }
+        .buttons a:hover {
+            background: #256d45;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>✅ Allocation Saved Successfully!</h1>
+        <p>Your allocation entry has been added to the Master Excel.</p>
+        <div class="buttons">
+            <a href="{{ url_for('form_step1') }}">➕ Make Another Allocation</a>
+            <a href="{{ url_for('download_options') }}">⬇ Download Data</a>
+            <a href="{{ url_for('dashboard') }}">🏠 Go to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

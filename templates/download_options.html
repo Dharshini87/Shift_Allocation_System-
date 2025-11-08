@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Download Allocation Data</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: "Poppins", sans-serif;
+            background: linear-gradient(135deg, #283e51, #485563);
+            color: white;
+            text-align: center;
+            padding-top: 100px;
+        }
+        .container {
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            padding: 40px;
+            width: 450px;
+            margin: auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #283e51;
+        }
+        .options {
+            margin-top: 25px;
+        }
+        .options a {
+            text-decoration: none;
+            display: block;
+            background: #283e51;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .options a:hover {
+            background: #1d2c3a;
+        }
+        .back {
+            margin-top: 25px;
+        }
+        .back a {
+            color: #283e51;
+            font-weight: bold;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Download Allocation Data</h1>
+        <p>Select the period you want to download:</p>
+        <div class="options">
+            <a href="{{ url_for('download_data', period='daily') }}">🗓 Daily Report</a>
+            <a href="{{ url_for('download_data', period='weekly') }}">📅 Weekly Report</a>
+            <a href="{{ url_for('download_data', period='monthly') }}">📆 Monthly Report</a>
+        </div>
+        <div class="back">
+            <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

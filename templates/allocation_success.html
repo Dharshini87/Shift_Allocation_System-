@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Allocation Saved{% endblock %}
+{% block content %}
+<div class="auth-container" style="text-align:center;">
+  <h2 style="color:green;">✅ Allocation Saved Successfully!</h2>
+  <p>What would you like to do next?</p>
+  <div style="margin-top:30px; display:flex; justify-content:center; gap:15px;">
+    <a href="{{ url_for('form_step1') }}" class="primary-btn" style="background:#4CAF50;">➕ Another Submission</a>
+    <a href="{{ url_for('download_choice') }}" class="secondary-btn" style="background:#2196F3;">📥 Download</a>
+  </div>
+</div>
+{% endblock %}

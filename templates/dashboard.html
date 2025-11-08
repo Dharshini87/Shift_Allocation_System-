@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card" style="text-align:center;">
+    <h2>Welcome, {{ user.name }} 👋</h2>
+    <div class="info-box" style="margin-top:15px;">
+      <p><strong>Role:</strong> {{ user.role }}</p>
+      {% if user.sub_role %}
+        <p><strong>Sub Role:</strong> {{ user.sub_role }}</p>
+      {% endif %}
+    </div>
+    <div class="button-group" style="margin-top:25px;">
+      <a href="{{ url_for('form_step1') }}" class="primary-btn">🧾 Start Allocation</a>
+      <a href="{{ url_for('logout') }}" class="secondary-btn">🚪 Logout</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

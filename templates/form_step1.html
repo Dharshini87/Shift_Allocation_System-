@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Allocation - Step 1{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card">
+    <h2>🗓 Allocation Details (Step 1)</h2>
+    <form method="POST" class="auth-form">
+      <div class="input-row">
+        <span class="input-emoji">📅</span>
+        <input type="date" name="date" value="{{ form1.date if form1 and form1.date else '' }}" required>
+      </div>
+
+      <div class="input-row">
+        <span class="input-emoji">⏰</span>
+        <select name="shift" required>
+          <option value="" disabled {% if not form1 or not form1.shift %}selected{% endif %}>Select Shift</option>
+          <option value="Shift 1" {% if form1 and form1.shift == 'Shift 1' %}selected{% endif %}>Shift 1</option>
+          <option value="Shift 2" {% if form1 and form1.shift == 'Shift 2' %}selected{% endif %}>Shift 2</option>
+          <option value="General" {% if form1 and form1.shift == 'General' %}selected{% endif %}>General</option>
+        </select>
+      </div>
+
+      <div class="input-row">
+        <span class="input-emoji">🕐</span>
+        <input type="text" name="shift_time" placeholder="Shift Time (e.g. 8:00)" value="{{ form1.shift_time.split()[0] if form1 and form1.shift_time else '' }}" required>
+        <select name="shift_period" required>
+          <option value="AM" {% if form1 and form1.shift_time and 'AM' in form1.shift_time %}selected{% endif %}>AM</option>
+          <option value="PM" {% if form1 and form1.shift_time and 'PM' in form1.shift_time %}selected{% endif %}>PM</option>
+        </select>
+      </div>
+
+      <div class="input-row">
+        <span class="input-emoji">📦</span>
+        <input type="text" name="alloc_time" placeholder="Allocation Time (e.g. 9:00)" value="{{ form1.alloc_time.split()[0] if form1 and form1.alloc_time else '' }}" required>
+        <select name="alloc_period" required>
+          <option value="AM" {% if form1 and form1.alloc_time and 'AM' in form1.alloc_time %}selected{% endif %}>AM</option>
+          <option value="PM" {% if form1 and form1.alloc_time and 'PM' in form1.alloc_time %}selected{% endif %}>PM</option>
+        </select>
+      </div>
+
+      <div class="input-row">
+        <span class="input-emoji">🧑‍💼</span>
+        <input type="text" value="{{ user.name }}" readonly>
+      </div>
+
+      <button type="submit" class="primary-btn">➡ Next</button>
+    </form>
+    <p class="small"><a href="{{ url_for('dashboard') }}">⬅ Back to Dashboard</a></p>
+  </div>
+</div>
+{% endblock %}

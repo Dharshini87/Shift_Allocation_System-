@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Submission Complete{% endblock %}
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card" style="text-align:center;">
+    <h2>✅ Submission Saved Successfully!</h2>
+    <p style="margin-top:10px;">What would you like to do next?</p>
+    <div class="button-group" style="margin-top:20px;">
+      <a href="{{ url_for('form_step1') }}" class="primary-btn">➕ Another Submission</a>
+      <a href="{{ url_for('download') }}" class="secondary-btn">⬇ Download Data</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

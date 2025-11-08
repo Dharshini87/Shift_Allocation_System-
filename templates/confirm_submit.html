@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Confirm Submission{% endblock %}
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card">
+    <h2>Are you sure you want to submit?</h2>
+    <form method="POST" action="{{ url_for('confirm_submit') }}">
+      <button type="submit" name="choice" value="yes" class="primary-btn">Yes, Submit</button>
+      <button type="submit" name="choice" value="no" class="secondary-btn">No, Go Back</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
