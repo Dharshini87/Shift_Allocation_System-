@@ -7,6 +7,7 @@
     <h2>⚙ Station & Operator (Step 2)</h2>
 
     <form method="POST" class="auth-form">
+
       <div class="input-row">
         <span class="input-emoji">🏭</span>
         <select name="station" required>
@@ -28,12 +29,14 @@
       </div>
 
       <div class="button-group">
-        <button type="submit" class="primary-btn">💾 Save Allocation</button>
+        <button type="submit" name="action" value="save" class="primary-btn">💾 Save Allocation</button>
         <a href="{{ url_for('form_step1') }}" class="secondary-btn">✏ Edit</a>
       </div>
+
     </form>
 
   </div>
 </div>
 {% endblock %}
+
 

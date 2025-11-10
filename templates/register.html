@@ -52,15 +52,17 @@
         <button type="button" class="eye-btn" data-target="reg_confirm">👁</button>
       </div>
 
-      <!-- Submit -->
       <button type="submit" class="primary-btn">Register</button>
 
-      <p class="small">Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+      <p class="small">Already have an account?
+        <a href="{{ url_for('login') }}">Login</a>
+      </p>
     </form>
   </div>
 </div>
+
 <script>
-  const SUB_ROLES = {{ SUB_ROLES|tojson }};
+  const SUB_ROLES = {{ SUB_ROLES | tojson }};
 
   function toggleSubRole() {
     const roleSelect = document.getElementById("role");
@@ -68,11 +70,10 @@
     const subRoleSelect = document.getElementById("sub_role");
     const selectedRole = roleSelect.value;
 
-    // Clear existing subroles
     subRoleSelect.innerHTML = '<option value="" disabled selected>Select Sub Role</option>';
 
     if (SUB_ROLES[selectedRole]) {
-      subRoleDiv.style.display = "flex"; // show
+      subRoleDiv.style.display = "flex";
       SUB_ROLES[selectedRole].forEach(sub => {
         const opt = document.createElement("option");
         opt.value = sub;
@@ -80,16 +81,9 @@
         subRoleSelect.appendChild(opt);
       });
     } else {
-      subRoleDiv.style.display = "none"; // hide
+      subRoleDiv.style.display = "none";
     }
   }
-
-  // Eye icon toggle
-  document.querySelectorAll(".eye-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const target = document.getElementById(btn.dataset.target);
-      target.type = target.type === "password" ? "text" : "password";
-    });
-  });
 </script>
+
 {% endblock %}

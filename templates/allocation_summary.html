@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Confirm Allocation{% endblock %}
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card" style="text-align:center;">
+    <h2>✅ Confirm Allocation</h2>
+
+    <p><b>Date:</b> {{ form1.date }}</p>
+    <p><b>Shift:</b> {{ form1.shift }}</p>
+    <p><b>Shift Time:</b> {{ form1.shift_time }}</p>
+    <p><b>Allocation Time:</b> {{ form1.alloc_time }}</p>
+    <p><b>Station:</b> {{ form2.station }}</p>
+    <p><b>Operator:</b> {{ form2.operator_name }} ({{ form2.operator_code }})</p>
+
+    <form method="POST" action="{{ url_for('save_allocation') }}">
+      <button class="primary-btn" type="submit">✅ Confirm & Save</button>
+    </form>
+
+    <a href="{{ url_for('form_step2') }}" class="secondary-btn" style="margin-top:15px;">
+      ✏ Edit Allocation
+    </a>
+  </div>
+</div>
+{% endblock %}

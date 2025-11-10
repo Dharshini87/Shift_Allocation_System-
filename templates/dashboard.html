@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
+
 {% block content %}
 <div class="auth-container">
   <div class="auth-card" style="text-align:center;">
@@ -16,4 +17,32 @@
     </div>
   </div>
 </div>
+
+{% if recent_allocations %}
+<div class="auth-container">
+  <div class="auth-card" style="width:700px;">
+    <h3 style="margin-bottom:15px;color:#004aad;">📋 Recent Allocations</h3>
+
+    <table style="width:100%; font-size:0.9rem; border-collapse:collapse;">
+      <tr style="background:#f2f6ff;">
+        <th>Date</th>
+        <th>Shift</th>
+        <th>Station</th>
+        <th>Operator</th>
+        <th>Time</th>
+      </tr>
+
+      {% for row in recent_allocations %}
+      <tr>
+        <td>{{ row[0] }}</td>
+        <td>{{ row[1] }}</td>
+        <td>{{ row[2] }}</td>
+        <td>{{ row[3] }}</td>
+        <td>{{ row[4] }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endif %}
 {% endblock %}
