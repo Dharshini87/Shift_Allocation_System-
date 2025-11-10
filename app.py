@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import sqlite3, os
 from datetime import datetime, timedelta
 import pandas as pd
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -9,16 +10,25 @@ DB_PATH = os.path.join("database", "users.db")
 
 # ---------------------- ROLES ----------------------
 ROLES = [
-    "Body Shop", "PTCFD Shop", "Paint Shop",
-    "Assembly", "End of Line"
+    "Body Shop",
+    "PTCFD Shop",
+    "Paint Shop",
+    "Assembly",
+    "End of Line"
 ]
 
 SUB_ROLES = {
     "Assembly": [
-        "Pre-Assembly", "Under Body",
-        "Floor Conveyor (1-5)", "Floor Conveyor (6-12)", "Sub Assembly"
+        "Pre-Assembly",
+        "Under Body",
+        "Floor Conveyor (1-5)",
+        "Floor Conveyor (6-12)",
+        "Sub Assembly"
     ],
-    "End of Line": ["Shift 1", "Shift 2"]
+    "End of Line": [
+        "Shift 1",
+        "Shift 2"
+    ]
 }
 
 # ---------------------- STATIONS ----------------------
@@ -63,7 +73,7 @@ subrole_operators = {
     }
 }
 
-# ---------------------- DATABASE ----------------------
+# ---------------------- DATABASE INIT ----------------------
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -98,6 +108,7 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 @app.before_request
 def before_request():
     init_db()
@@ -114,7 +125,6 @@ def about():
 @app.route('/achievements')
 def achievements():
     return render_template("achievements.html")
-
 
 # ---------------------- REGISTER ----------------------
 @app.route('/register', methods=['GET', 'POST'])
@@ -135,19 +145,22 @@ def register():
             flash("Only company email allowed!", "error")
             return redirect(url_for('register'))
 
+        hashed_pw = generate_password_hash(password)
+
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         try:
-            c.execute(
-                "INSERT INTO users (name, email, password, role, sub_role) VALUES (?, ?, ?, ?, ?)",
-                (name, email, password, role, sub_role)
-            )
+            c.execute("""
+                INSERT INTO users (name, email, password, role, sub_role)
+                VALUES (?, ?, ?, ?, ?)
+            """, (name, email, hashed_pw, role, sub_role))
             conn.commit()
-            flash("Registration successful!", "success")
+            flash("Registration successful! Please login.", "success")
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
             flash("Email already exists!", "error")
-        conn.close()
+        finally:
+            conn.close()
 
     return render_template('register.html', ROLES=ROLES, SUB_ROLES=SUB_ROLES)
 
@@ -158,15 +171,14 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        role = request.form['role']
 
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
-        c.execute("SELECT * FROM users WHERE email=? AND password=? AND role=?", (email, password, role))
+        c.execute("SELECT * FROM users WHERE email=?", (email,))
         user = c.fetchone()
         conn.close()
 
-        if user:
+        if user and check_password_hash(user[3], password):
             session['user'] = {
                 'id': user[0],
                 'name': user[1],
@@ -174,35 +186,20 @@ def login():
                 'role': user[4],
                 'sub_role': user[5]
             }
+            flash("Login successful!", "success")
             return redirect(url_for('dashboard'))
-
-        flash("Invalid credentials!", "error")
+        else:
+            flash("Invalid email or password!", "error")
 
     return render_template('login.html', ROLES=ROLES, SUB_ROLES=SUB_ROLES)
 
 
-# ---------------------- DASHBOARD (With History) ----------------------
+# ---------------------- DASHBOARD ----------------------
 @app.route('/dashboard')
 def dashboard():
     if 'user' not in session:
         return redirect(url_for('login'))
-
-    user = session['user']
-
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("""
-        SELECT date, shift, station, operator_name, shift_time
-        FROM allocations
-        WHERE allocated_by = ?
-        ORDER BY date DESC
-        LIMIT 5
-    """, (user['name'],))
-    recent_allocations = c.fetchall()
-    conn.close()
-
-    return render_template('dashboard.html', user=user, recent_allocations=recent_allocations)
-
+    return render_template('dashboard.html', user=session['user'])
 
 # ---------------------- FORM STEP 1 ----------------------
 @app.route('/form_step1', methods=['GET', 'POST'])
@@ -224,7 +221,6 @@ def form_step1():
         return redirect(url_for('form_step2'))
 
     return render_template('form_step1.html', user=session['user'], form1=session.get('form1'))
-
 
 # ---------------------- FORM STEP 2 ----------------------
 @app.route('/form_step2', methods=['GET', 'POST'])
@@ -257,8 +253,7 @@ def form_step2():
 
     return render_template('form_step2.html', stations=stations, operators=operators, form1=session.get('form1'))
 
-
-# ---------------------- SUMMARY ----------------------
+# ---------------------- SUMMARY SCREEN ----------------------
 @app.route('/summary')
 def summary():
     if 'form1' not in session or 'form2' not in session:
@@ -269,8 +264,7 @@ def summary():
                            form1=session['form1'],
                            form2=session['form2'])
 
-
-# ---------------------- SAVE ALLOCATION ----------------------
+# ---------------------- FINAL SAVE ----------------------
 @app.route('/save_allocation', methods=['POST'])
 def save_allocation():
     form1 = session['form1']
@@ -296,14 +290,12 @@ def save_allocation():
 
     return redirect(url_for('download_choice'))
 
-
-# ---------------------- DOWNLOAD CHOICE ----------------------
+# ---------------------- DOWNLOAD CHOICE PAGE ----------------------
 @app.route('/download_choice')
 def download_choice():
     return render_template('download_choice.html')
 
-
-# ---------------------- DOWNLOAD REPORT ----------------------
+# ---------------------- DOWNLOAD ----------------------
 @app.route('/download/<period>')
 def download(period):
     conn = sqlite3.connect(DB_PATH)
@@ -329,18 +321,17 @@ def download(period):
 
     return send_file(file_path, as_attachment=True)
 
-
 # ---------------------- LOGOUT ----------------------
 @app.route('/logout')
 def logout():
     session.clear()
+    flash("Logged out successfully.", "info")
     return redirect(url_for('login'))
 
 
 if __name__ == "__main__":
     os.makedirs("database", exist_ok=True)
     app.run(debug=True)
-
 
 
 
