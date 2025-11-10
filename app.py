@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import sqlite3, os
 from datetime import datetime, timedelta
 import pandas as pd
-from werkzeug.security import generate_password_hash, check_password_hash
+from openpyxl import load_workbook
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -145,17 +145,15 @@ def register():
             flash("Only company email allowed!", "error")
             return redirect(url_for('register'))
 
-        hashed_pw = generate_password_hash(password)
-
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         try:
-            c.execute("""
-                INSERT INTO users (name, email, password, role, sub_role)
-                VALUES (?, ?, ?, ?, ?)
-            """, (name, email, hashed_pw, role, sub_role))
+            c.execute(
+                "INSERT INTO users (name, email, password, role, sub_role) VALUES (?, ?, ?, ?, ?)",
+                (name, email, password, role, sub_role)
+            )
             conn.commit()
-            flash("Registration successful! Please login.", "success")
+            flash("Registration successful!", "success")
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
             flash("Email already exists!", "error")
@@ -164,21 +162,26 @@ def register():
 
     return render_template('register.html', ROLES=ROLES, SUB_ROLES=SUB_ROLES)
 
-
-# ---------------------- LOGIN ----------------------
+# ---------------------- LOGIN (FIXED) ----------------------
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
+        email = request.form['email'].strip()
+        password = request.form['password'].strip()
+        role = request.form['role'].strip()
+        sub_role = request.form.get('sub_role', '').strip()
 
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
-        c.execute("SELECT * FROM users WHERE email=?", (email,))
+        c.execute("""
+            SELECT * FROM users 
+            WHERE email=? AND password=? AND role=? 
+            AND (sub_role=? OR sub_role IS NULL OR sub_role='')
+        """, (email, password, role, sub_role))
         user = c.fetchone()
         conn.close()
 
-        if user and check_password_hash(user[3], password):
+        if user:
             session['user'] = {
                 'id': user[0],
                 'name': user[1],
@@ -189,10 +192,9 @@ def login():
             flash("Login successful!", "success")
             return redirect(url_for('dashboard'))
         else:
-            flash("Invalid email or password!", "error")
+            flash("Invalid credentials. Please check email, password, role and sub-role.", "error")
 
     return render_template('login.html', ROLES=ROLES, SUB_ROLES=SUB_ROLES)
-
 
 # ---------------------- DASHBOARD ----------------------
 @app.route('/dashboard')
@@ -295,29 +297,43 @@ def save_allocation():
 def download_choice():
     return render_template('download_choice.html')
 
-# ---------------------- DOWNLOAD ----------------------
+# ---------------------- UPDATED DOWNLOAD ROUTE ----------------------
 @app.route('/download/<period>')
 def download(period):
     conn = sqlite3.connect(DB_PATH)
     df = pd.read_sql_query("SELECT * FROM allocations", conn)
     conn.close()
 
-    df['date'] = pd.to_datetime(df['date'])
+    df['date'] = pd.to_datetime(df['date']).dt.strftime("%d-%m-%Y")
     today = datetime.now()
 
     if period == "daily":
-        df = df[df['date'].dt.date == today.date()]
+        df_filtered = df[pd.to_datetime(df['date'], format="%d-%m-%Y").dt.date == today.date()]
         filename = "Daily_Allocations.xlsx"
     elif period == "weekly":
-        df = df[df['date'] >= today - timedelta(days=7)]
+        df_filtered = df[pd.to_datetime(df['date'], format="%d-%m-%Y") >= today - timedelta(days=7)]
         filename = "Weekly_Allocations.xlsx"
     else:
-        df = df[df['date'] >= today - timedelta(days=30)]
+        df_filtered = df[pd.to_datetime(df['date'], format="%d-%m-%Y") >= today - timedelta(days=30)]
         filename = "Monthly_Allocations.xlsx"
 
     os.makedirs("downloads", exist_ok=True)
     file_path = os.path.join("downloads", filename)
-    df.to_excel(file_path, index=False)
+
+    with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+        df_filtered.to_excel(writer, index=False, sheet_name='Allocations')
+        worksheet = writer.sheets['Allocations']
+
+        for column_cells in worksheet.columns:
+            max_length = 0
+            column = column_cells[0].column_letter
+            for cell in column_cells:
+                try:
+                    if cell.value:
+                        max_length = max(max_length, len(str(cell.value)))
+                except:
+                    pass
+            worksheet.column_dimensions[column].width = max_length + 2
 
     return send_file(file_path, as_attachment=True)
 
@@ -325,14 +341,9 @@ def download(period):
 @app.route('/logout')
 def logout():
     session.clear()
-    flash("Logged out successfully.", "info")
     return redirect(url_for('login'))
 
-
+# ---------------------- MAIN ----------------------
 if __name__ == "__main__":
     os.makedirs("database", exist_ok=True)
     app.run(debug=True)
-
-
-
-
